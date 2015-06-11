@@ -12,4 +12,4 @@ Slickplan Importer plugin for WordPress, imports pages from a [Slickplan.com](ht
 
 ## Support
 
-Having trouble with plugin? Check out the documentation at [help.slickplan.com](http://help.slickplan.com/) or contact us directly via email [support@slickplan.com](mailto:support@slickplan.com).
+Having trouble with plugin? Check out the documentation at [help.slickplan.com](http://help.slickplan.com/hc/en-us/articles/203710090) or contact us directly via email [support@slickplan.com](mailto:support@slickplan.com).
