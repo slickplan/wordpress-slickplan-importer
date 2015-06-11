@@ -1,0 +1,21 @@
+#slickplan-importer h2 {
+    border-bottom: 1px solid #eee;
+    font-size: 1.25em;
+    font-weight: 700;
+    margin: 0;
+    padding: .4em .6em;
+}
+
+#slickplan-importer span.description {
+    opacity: .5;
+    display: inline-block;
+    padding-top: 4px;
+}
+
+#slickplan-importer table.users-mapping td {
+    padding: 5px 0;
+}
+
+#slickplan-importer td[colspan="2"] {
+    padding: 0;
+}
