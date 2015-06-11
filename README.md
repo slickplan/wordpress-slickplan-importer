@@ -6,9 +6,9 @@ Slickplan Importer plugin for WordPress, imports pages from a [Slickplan.com](ht
 
 ## Installation
 
-1. Search for 'Slickplan Importer' under 'Plugins > Add New' and install the plugin or download this repository and upload all files to `/wp-content/plugins/slickplan-importer/` directory.
+1. Search for 'Slickplan Importer' under 'Plugins > Add New' and install the plugin **or** download this repository and upload all files to `/wp-content/plugins/slickplan-importer/` directory.
 2. Activate the 'Slickplan Importer' module through the 'Plugins' menu in WordPress.
-3. Click on the menu item 'Tools > Import' and then click 'Slickplan Importer'.
+3. Click on the menu item 'Tools > Import' and then click 'Slickplan'.
 
 ## Support
 
