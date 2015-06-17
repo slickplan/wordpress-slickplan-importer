@@ -6,7 +6,7 @@ Description: Import pages from a <a href="http://slickplan.com" target="_blank">
 Author: Slickplan.com <info@slickplan.com>
 Author URI: http://slickplan.com/
 Version: 2.0.0
-License: GNU General Public License Version 3 - http://www.gnu.org/licenses/gpl-3.0.html
+License: GPL-3.0 - http://www.gnu.org/licenses/gpl-3.0.html
 */
 
 function_exists('ob_start') and ob_start();
