@@ -1,3 +1,5 @@
+<?php defined('SLICKPLAN_PLUGIN_PATH') or exit('No direct access allowed'); ?>
+
 <div class="updated" style="border-color: #FFBA00">
     <p>Your file has been uploaded. Please review the import options below and click <strong>Import Pages</strong> button to finish import.</p>
 </div>
@@ -11,9 +13,9 @@
                 </th>
                 <td>
                     <?php
-                    $title = (isset($slickplan['settings']['title']) and $slickplan['settings']['title'])
-                        ? $slickplan['settings']['title']
-                        : $slickplan['title'];
+                    $title = (isset($xml['settings']['title']) and $xml['settings']['title'])
+                        ? $xml['settings']['title']
+                        : $xml['title'];
                     $checkboxes = array();
                     if ($title) {
                         $checkboxes[] = $this->_displayCheckbox(
@@ -23,20 +25,20 @@
                             'It will change the Site Title in General Settings'
                         );
                     }
-                    if (isset($slickplan['settings']['tagline']) and $slickplan['settings']['tagline']) {
+                    if (isset($xml['settings']['tagline']) and $xml['settings']['tagline']) {
                         $checkboxes[] = $this->_displayCheckbox(
                             'settings_tagline',
-                            'Set website tagline to <cite>&bdquo;' . $slickplan['settings']['tagline'] . '&rdquo;</cite>',
+                            'Set website tagline to <cite>&bdquo;' . $xml['settings']['tagline'] . '&rdquo;</cite>',
                             false,
                             'It will change the Tagline in General Settings'
                         );
                     }
-                    if (isset($slickplan['settings']['language']) and $slickplan['settings']['language']) {
+                    if (isset($xml['settings']['language']) and $xml['settings']['language']) {
                         $languages = wp_get_available_translations();
-                        if (is_array($languages) and isset($languages[$slickplan['settings']['language']])) {
+                        if (is_array($languages) and isset($languages[$xml['settings']['language']])) {
                             $checkboxes[] = $this->_displayCheckbox(
                                 'settings_language',
-                                'Set website language to <cite>&bdquo;' . $languages[$slickplan['settings']['language']]['native_name'] . '&rdquo;</cite>',
+                                'Set website language to <cite>&bdquo;' . $languages[$xml['settings']['language']]['native_name'] . '&rdquo;</cite>',
                                 false,
                                 'It will change the Site Language in General Settings'
                             );
@@ -115,7 +117,7 @@
                     ?>
                 </td>
             </tr>
-            <?php if (isset($slickplan['users']) and is_array($slickplan['users']) and count($slickplan['users'])) { ?>
+            <?php if (isset($xml['users']) and is_array($xml['users']) and count($xml['users'])) { ?>
                 <tr><td colspan="2"><hr></td></tr>
                 <tr>
                     <th scope="row">
@@ -125,7 +127,7 @@
                         <table class="users-mapping">
                             <tbody>
                                 <?php
-                                foreach ($slickplan['users'] as $user_id => $data) {
+                                foreach ($xml['users'] as $user_id => $data) {
                                     $name = array();
                                     if (isset($data['firstName']) and $data['firstName']) {
                                         $name[] = $data['firstName'];
@@ -156,18 +158,10 @@
             <tr><td colspan="2"><hr></td></tr>
         </tbody>
     </table>
-    <?php if (isset($slickplan['sitemap']) and is_array($slickplan['sitemap']) and count($slickplan['sitemap'])) { ?>
+    <?php if (isset($xml['sitemap']) and is_array($xml['sitemap']) and count($xml['sitemap'])) { ?>
         <input class="button button-primary" type="submit" value="Import Pages">
         <a href="<?php echo esc_attr($this->_getAdminUrl()); ?>" class="button button-secondary">Cancel</a>
     <?php } else { ?>
         <a href="<?php echo esc_attr($this->_getAdminUrl()); ?>" class="button button-secondary">Back</a>
     <?php } ?>
 </form>
-
-<style type="text/css">
-    <?php require SLICKPLAN_PLUGIN_PATH . 'assets/styles.css'; ?>
-</style>
-
-<script type="text/javascript">
-    <?php require SLICKPLAN_PLUGIN_PATH . 'assets/scripts.js'; ?>
-</script>

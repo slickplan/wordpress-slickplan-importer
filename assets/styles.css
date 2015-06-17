@@ -19,3 +19,30 @@
 #slickplan-importer td[colspan="2"] {
     padding: 0;
 }
+
+#slickplan-progressbar {
+    position: relative;
+    background: #fff;
+    border: 1px solid #aaa;
+    color: #222;
+    height: 29px;
+}
+
+#slickplan-progressbar .ui-progressbar-value {
+    background: #ccc;
+    color: #222;
+    font-weight: bold;
+    height: 29px;
+    width: 0px;
+    -webkit-transition: width .2s ease;
+    -moz-transition: width .2s ease;
+    transition: width .2s ease;
+}
+
+#slickplan-progressbar .progress-label {
+    position: absolute;
+    left: 49%;
+    top: 5px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+}
