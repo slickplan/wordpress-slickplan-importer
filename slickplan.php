@@ -396,6 +396,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                     or isset($data['contents']['meta_description'])
                     or isset($data['contents']['meta_focus_keyword'])
                 ) {
+                    // SEO by Yoast integration
                     if (class_exists('WPSEO_Meta') and method_exists('WPSEO_Meta', 'set_value')) {
                         if (isset($data['contents']['meta_title']) and $data['contents']['meta_title']) {
                             WPSEO_Meta::set_value('title', $data['contents']['meta_title'], $page['ID']);
@@ -405,6 +406,21 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                         }
                         if (isset($data['contents']['meta_focus_keyword']) and $data['contents']['meta_focus_keyword']) {
                             WPSEO_Meta::set_value('focuskw', $data['contents']['meta_focus_keyword'], $page['ID']);
+                        }
+                    }
+                    // All In One SEO Pack integration
+                    if (defined('AIOSEOP_VERSION')) {
+                        if (isset($data['contents']['meta_title']) and $data['contents']['meta_title']) {
+                            delete_post_meta($page['ID'], '_aioseop_title');
+                            add_post_meta($page['ID'], '_aioseop_title', $data['contents']['meta_title']);
+                        }
+                        if (isset($data['contents']['meta_description']) and $data['contents']['meta_description']) {
+                            delete_post_meta($page['ID'], '_aioseop_description');
+                            add_post_meta($page['ID'], '_aioseop_description', $data['contents']['meta_description']);
+                        }
+                        if (isset($data['contents']['meta_focus_keyword']) and $data['contents']['meta_focus_keyword']) {
+                            delete_post_meta($page['ID'], '_aioseop_keywords');
+                            add_post_meta($page['ID'], '_aioseop_keywords', $data['contents']['meta_focus_keyword']);
                         }
                     }
                 }
