@@ -13,7 +13,9 @@
     <div class="updated slickplan-show-summary"<?php if (!$is_summary) { ?> style="display: none"<?php } ?>>
         <p>Pages have been imported. Thank you for using <a href="http://slickplan.com/" target="_blank">Slickplan</a> Importer.</p>
     </div>
-    <div id="slickplan-progressbar" class="progressbar"><div class="progress-label">0%</div></div>
+    <?php if (!$is_summary) { ?>
+        <div id="slickplan-progressbar" class="progressbar"><div class="progress-label">0%</div></div>
+    <?php } ?>
     <p><hr></p>
     <div class="slickplan-summary"><?php if ($is_summary) echo $xml['summary']; ?></div>
     <p><hr></p>
