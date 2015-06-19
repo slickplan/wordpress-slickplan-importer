@@ -398,17 +398,16 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 ) {
                     if (class_exists('WPSEO_Meta') and method_exists('WPSEO_Meta', 'set_value')) {
                         if (isset($data['contents']['meta_title']) and $data['contents']['meta_title']) {
-                            WPSEO_Meta::set_value('yoast_wpseo_title', $data['contents']['meta_title'], $page['ID']);
+                            WPSEO_Meta::set_value('title', $data['contents']['meta_title'], $page['ID']);
                         }
                         if (isset($data['contents']['meta_description']) and $data['contents']['meta_description']) {
-                            WPSEO_Meta::set_value('yoast_wpseo_metadesc', $data['contents']['meta_description'], $page['ID']);
+                            WPSEO_Meta::set_value('metadesc', $data['contents']['meta_description'], $page['ID']);
                         }
                         if (isset($data['contents']['meta_focus_keyword']) and $data['contents']['meta_focus_keyword']) {
-                            WPSEO_Meta::set_value('yoast_wpseo_focuskw', $data['contents']['meta_focus_keyword'], $page['ID']);
+                            WPSEO_Meta::set_value('focuskw', $data['contents']['meta_focus_keyword'], $page['ID']);
                         }
                     }
                 }
-
                 $page['url'] = get_permalink($page['ID']);
                 $page['url'] = '/' . ltrim(str_replace(home_url('/'), '', $page['url']), '/');
                 $page['url_href'] = get_admin_url(null, 'post.php?post=' . $page['ID'] . '&action=edit');
