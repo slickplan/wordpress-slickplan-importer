@@ -3,12 +3,14 @@ Contributors: slickplan
 Donate link: http://slickplan.com/
 Tags: slickplan, import, xml
 Requires at least: 3.0
-Tested up to: 4.2.2
+Tested up to: 4.4
 Stable tag: trunk
 License: GPL-3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-Import pages from a Slickplan's XML export file. PHP5+ required.
+The Slickplan import plugin allows you to quickly import your Slickplan projects into your WordPress site.
+
+When you are finished planning your website project, import your Slickplan website plan. Upon import, your pages, navigation structure, and content will be instantly ready in your CMS.
 
 == Installation ==
 

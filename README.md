@@ -1,6 +1,8 @@
 # [Slickplan](http://slickplan.com) Importer - WordPress Plugin
 
-Slickplan Importer plugin for WordPress, imports pages from a [Slickplan.com](http://slickplan.com)’s XML export file into your WordPress site.
+The Slickplan import plugin allows you to quickly import your [Slickplan.com](http://slickplan.com) projects into your WordPress site.
+
+When you are finished planning your website project, import your [Slickplan.com](http://slickplan.com) website plan. Upon import, your pages, navigation structure, and content will be instantly ready in your CMS.
 
 [https://wordpress.org/plugins/slickplan-importer/](https://wordpress.org/plugins/slickplan-importer/)
 
