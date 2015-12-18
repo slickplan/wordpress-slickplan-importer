@@ -924,7 +924,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 $array
                 and is_array($array)
                 and isset($array['title'], $array['version'], $array['link'])
-                and is_string($array['link']) and strstr($array['link'], 'slickplan')
+                and is_string($array['link']) and strstr($array['link'], 'slickplan.')
             );
             if ($first_test) {
                 if ($parsed) {
