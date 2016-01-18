@@ -3,7 +3,7 @@ Contributors: slickplan
 Donate link: http://slickplan.com/
 Tags: slickplan, import, xml
 Requires at least: 3.0
-Tested up to: 4.4
+Tested up to: 4.4.1
 Stable tag: trunk
 License: GPL-3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
