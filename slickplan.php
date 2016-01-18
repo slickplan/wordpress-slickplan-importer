@@ -279,8 +279,19 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                     'titles' => isset($form['titles_change']) ? $form['titles_change'] : '',
                     'content' => isset($form['content']) ? $form['content'] : '',
                     'content_files' => (isset($form['content_files']) and $form['content_files']),
+                    'create_menu' => (isset($form['create_menu']) and $form['create_menu']),
                     'users' => isset($form['users_map']) ? $form['users_map'] : array(),
                 );
+                if ($this->_options['create_menu']) {
+                    $menu_name = $menu_name_orig = (isset($form['menu_name']) and $form['menu_name']) ? $form['menu_name'] : 'Slickplan';
+                    $i = 0;
+                    while (get_term_by('name', $menu_name, 'nav_menu')) {
+                        $menu_name = $menu_name_orig . ' ' . (++$i);
+                    }
+                    $this->_options['create_menu'] = wp_create_nav_menu($menu_name);
+                } else {
+                    $this->_options['create_menu'] = false;
+                }
                 if ($this->_options['content_files']) {
                     $xml['import_options'] = $this->_options;
                     update_option(SLICKPLAN_PLUGIN_OPTION, $xml);
@@ -346,7 +357,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 'post_type' => 'page',
                 'post_title' => $this->_getFormattedTitle($data),
                 'menu_order' => $this->_order,
-                'post_parent' => $parent_id,
+                'post_parent' => (int) $parent_id,
             );
 
             // Set post content
@@ -389,6 +400,28 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 $this->_summary[] = $this->getSummaryRow($page);
             } else {
                 $page['ID'] = (int) $page_id;
+
+                // Add page to nav menu
+                if ($this->_options['create_menu']) {
+                    $menu_parent = 0;
+                    if ($page['post_parent']) {
+                        $menu_items = (array) wp_get_nav_menu_items($this->_options['create_menu'], array('post_status' => 'publish,draft'));
+                        foreach ($menu_items as $menu_item) {
+                            if ($page['post_parent'] === intval($menu_item->object_id)) {
+                                $menu_parent = (int) $menu_item->ID;
+                                break;
+                            }
+                        }
+                    }
+                    wp_update_nav_menu_item($this->_options['create_menu'], 0, array(
+                        'menu-item-title' => $page['post_title'],
+                        'menu-item-object' => 'page',
+                        'menu-item-object-id' => $page['ID'],
+                        'menu-item-type' => 'post_type',
+                        'menu-item-status' => 'publish',
+                        'menu-item-parent-id' => $menu_parent,
+                    ));
+                }
 
                 // Set the SEO meta values
                 if (
@@ -763,7 +796,9 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 $html .= ' ' . $key . '="' . esc_attr($value) . '"';
             }
             $html .= '>' . $label . '</label>';
-            if ($description) {
+            if (is_array($description)) {
+                $html .= implode($description);
+            } elseif ($description) {
                 $html .= '<br><span class="description">(' . $description . ')</span>';
             }
             return $html;
@@ -829,12 +864,22 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                         if (isset($array['diagram'])) {
                             unset($array['diagram']);
                         }
+                        if (isset($array['section']['options'])) {
+                            $array['section'] = array($array['section']);
+                        }
                         $array['sitemap'] = $this->_getMultidimensionalArrayHelper($array);
                         $array['users'] = array();
                         $array['pages'] = array();
-                        foreach ($array['section'] as $section) {
+                        foreach ($array['section'] as $section_key => $section) {
                             if (isset($section['cells']['cell']) and is_array($section['cells']['cell'])) {
-                                foreach ($section['cells']['cell'] as $cell) {
+                                foreach ($section['cells']['cell'] as $cell_key => $cell) {
+                                    if (
+                                        isset($section['options']['id'], $cell['level'])
+                                        and $cell['level'] === 'home'
+                                        and $section['options']['id'] !== 'svgmainsection'
+                                    ) {
+                                        unset($array['section'][$section_key]['cells']['cell'][$cell_key]);
+                                    }
                                     if (isset(
                                         $cell['contents']['assignee']['@value'],
                                         $cell['contents']['assignee']['@attributes']
@@ -931,7 +976,10 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                     if (isset($array['sitemap']) and is_array($array['sitemap'])) {
                         return true;
                     }
-                } elseif (isset($array['section'][0]['options']['id'], $array['section'][0]['cells'])) {
+                } elseif (
+                    isset($array['section']['options']['id'], $array['section']['cells'])
+                    or isset($array['section'][0]['options']['id'], $array['section'][0]['cells'])
+                ) {
                     return true;
                 }
             }

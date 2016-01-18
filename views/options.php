@@ -44,6 +44,12 @@
                             );
                         }
                     }
+                    $checkboxes[] = $this->_displayCheckbox(
+                        'create_menu',
+                        'Create menu from imported pages, menu name: ',
+                        false,
+                        array('<input type="text" name="menu_name" value="Slickplan">')
+                    );
                     echo implode('<br><br>', $checkboxes);
                     ?>
                 </td>
