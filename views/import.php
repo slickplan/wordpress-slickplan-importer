@@ -16,9 +16,9 @@
     <?php if (!$is_summary) { ?>
         <div id="slickplan-progressbar" class="progressbar"><div class="progress-label">0%</div></div>
     <?php } ?>
-    <p><hr></p>
+    <hr>
     <div class="slickplan-summary"><?php if ($is_summary) echo $xml['summary']; ?></div>
-    <p><hr></p>
+    <hr>
     <p class="slickplan-show-summary"<?php if (!$is_summary) { ?> style="display: none"<?php } ?>>
         <a href="<?php echo esc_url(get_admin_url(null, 'edit.php?post_type=page')); ?>" class="button button-secondary">See all pages</a>
     </p>

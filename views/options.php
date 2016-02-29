@@ -92,26 +92,33 @@
                 </th>
                 <td id="slickplan-page-content-radios">
                     <?php
+                    $radio = $this->_displayRadio(
+                        'content',
+                        'Import page content from Content Planner',
+                        'contents',
+                        '',
+                        true
+                    );
+                    if (isset($no_of_files) and $no_of_files) {
+                        $radio .= '<br class="content-suboption-br">'
+                            . '<span class="content-suboption" style="display: inline-block; padding: 3px 0 0 20px;">'
+                            . $this->_displayCheckbox(
+                                'content_files',
+                                'Import files to media library',
+                                true,
+                                'Downloading files may take a while'
+                                    . ((isset($filesize_total) and $filesize_total)
+                                        ? ' approx total size: ' . size_format($filesize_total)
+                                        : ''
+                                    )
+                            )
+                            . '</span>';
+                    }
                     $radios = array();
-                    $radios[] = $this->_displayRadio(
-                            'content',
-                            'Import page content',
-                            'contents',
-                            '',
-                            true
-                        )
-                        . '<br class="content-suboption-br">'
-                        . '<span class="content-suboption" style="display: inline-block; padding: 3px 0 0 20px;">'
-                        . $this->_displayCheckbox(
-                            'content_files',
-                            'Import files to media library',
-                            true,
-                            'Downloading files may take a while'
-                        )
-                        . '</span>';
+                    $radios[] = $radio;
                     $radios[] = $this->_displayRadio(
                         'content',
-                        'Import page notes as content',
+                        'Import notes as page content',
                         'desc'
                     );
                     $radios[] = $this->_displayRadio(

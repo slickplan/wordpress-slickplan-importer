@@ -20,6 +20,10 @@
     padding: 0;
 }
 
+#slickplan-importer .slickplan-summary {
+    overflow: auto;
+}
+
 #slickplan-progressbar {
     position: relative;
     background: #fff;

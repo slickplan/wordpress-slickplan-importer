@@ -3,7 +3,7 @@ Contributors: slickplan
 Donate link: http://slickplan.com/
 Tags: slickplan, import, xml
 Requires at least: 3.0
-Tested up to: 4.4.1
+Tested up to: 4.4.2
 Stable tag: trunk
 License: GPL-3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -20,13 +20,19 @@ When you are finished planning your website project, import your Slickplan websi
 
 == Changelog ==
 
+= 2.1 =
+* New: Added support for internal links when importing content
+* New: Added an information about approx total files size to "import files" option
+* Fix: Don't use AJAX importer when importing content from notes
+* Fix: Hide "import files" option when there is no files to import
+
 = 2.0 =
-* New: Import is now a 2 steps process, import options have been moved to Step 2
-* New: Added content gathering support - plugin can import page content, SEO meta and download files
-* Fix: Dropped a PHP's libxml extension requirement, plugin now requires DOMElement which is default PHP5 extension
+* New: Import is now a 2 steps process - import options have been moved to Step 2
+* New: Added Content Planner support - plugin now can import page content, SEO meta and download files to media library
+* Fix: Dropped the PHP's libxml extension requirement, plugin now requires DOMElement which is default PHP5 extension
 
 = 1.2 =
-* New: Option to set menu order number when importing
+* New: Automatically add currect page order attribute
 
 = 1.1 =
 * Fix: Support for PHP 5.2

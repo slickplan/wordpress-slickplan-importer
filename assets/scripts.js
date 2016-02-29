@@ -20,9 +20,11 @@ jQuery(document).ready(function($) {
         return;
     }
 
+    var $window = $(window);
     var $form = $('form#slickplan-importer');
     var $summary = $form.find('.slickplan-summary');
     var $progress = $('#slickplan-progressbar');
+    var $wpbody = $('#wpbody-content');
 
     $progress.progressbar({
         value: 0,
@@ -60,39 +62,49 @@ jQuery(document).ready(function($) {
     var _importPage = function(page) {
         var html = ('' + slickplan_ajax.html).replace('{title}', page.title);
         var $element = $(html).appendTo($summary);
+        $summary.scrollTop(999999);
         var percent = Math.round((_importIndex / _pages.length) * 100);
         $progress.progressbar('value', percent);
-        $.post(slickplan_ajax.ajaxurl, {
-            action: 'slickplan-importer',
-            slickplan: {
-                page: page.id,
-                parent: page.parent ? page.parent : '',
-                mlid: page.mlid ? page.mlid : 0,
-                last: (_pages && _pages[_importIndex + 1]) ? 0 : 1
+        $.ajax({
+            url: slickplan_ajax.ajaxurl,
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'slickplan-importer',
+                slickplan: {
+                    page: page.id,
+                    parent: page.parent ? page.parent : '',
+                    mlid: page.mlid ? page.mlid : 0,
+                    last: (_pages && _pages[_importIndex + 1]) ? 0 : 1
+                },
+                _ajax_nonce: slickplan_ajax.nonce
             },
-            _ajax_nonce: slickplan_ajax.nonce
-        }, function(data) {
-            if (data && data.html) {
-                $element.replaceWith(data.html);
-                ++_importIndex;
-                if (data) {
-                    if (data.mlid) {
-                        _addMenuID(page.id, data.mlid);
+            success: function(data) {
+                if (data && data.html) {
+                    $element.replaceWith(data.html);
+                    ++_importIndex;
+                    if (data) {
+                        if (data.mlid) {
+                            _addMenuID(page.id, data.mlid);
+                        }
+                    }
+                    if (_pages && _pages[_importIndex]) {
+                        _importPage(_pages[_importIndex]);
+                    } else {
+                        $progress.progressbar('value', 100);
+                        $form.find('h3').text('Success!');
+                        $form.find('.slickplan-show-summary').show();
+                        $window.trigger('resize');
+                        //setTimeout(function() {
+                        //    $progress.remove();
+                        //}, 500);
                     }
                 }
-                if (_pages && _pages[_importIndex]) {
-                    _importPage(_pages[_importIndex]);
-                } else {
-                    $progress.progressbar('value', 100);
-                    $form.find('h3').text('Success!');
-                    $form.find('.slickplan-show-summary').show();
-                    $(window).scrollTop(0);
-                    setTimeout(function() {
-                        $progress.remove();
-                    }, 500);
-                }
+            },
+            error: function() {
+                alert('Unknown error, please delete imported pages and try again.');
             }
-        }, 'json');
+        });
     };
 
     var types = ['home', '1', 'util', 'foot'];
@@ -102,12 +114,20 @@ jQuery(document).ready(function($) {
         }
     }
 
-    $(window).load(function() {
-        _importIndex = 0;
-        if (_pages && _pages[_importIndex]) {
-            $(window).scrollTop(0);
-            _importPage(_pages[_importIndex]);
-        }
-    });
+    $window
+        .on('load', function() {
+            _importIndex = 0;
+            if (_pages && _pages[_importIndex]) {
+                _importPage(_pages[_importIndex]);
+            }
+        })
+        .on('load resize', function() {
+            var top = $summary.offset().top;
+            $summary.hide();
+            var form_height = $form.height();
+            $summary.show();
+            var height = $window.height() - form_height - top - 5;
+            $summary.height(height);
+        });
 
 });
