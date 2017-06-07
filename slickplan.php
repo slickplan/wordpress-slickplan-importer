@@ -594,114 +594,109 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
         private function _getFormattedContent(array $contents)
         {
             $post_content = array();
-            foreach ($contents as $type => $content) {
-                if (isset($content['content'])) {
-                    $content = array($content);
+            foreach ($contents as $element) {
+                if (!isset($element['content']) or !isset($element['type'])) {
+                    continue;
                 }
-                foreach ($content as $element) {
-                    if (!isset($element['content'])) {
-                        continue;
-                    }
-                    $html = '';
-                    switch ($type) {
-                        case 'wysiwyg':
-                            $html .= $element['content'];
-                            break;
-                        case 'text':
-                            $html .= htmlspecialchars($element['content']);
-                            break;
-                        case 'image':
-                            if (isset($element['content']['type'], $element['content']['url'])) {
-                                $attrs = array(
-                                    'alt' => isset($element['content']['alt'])
-                                        ? $element['content']['alt']
-                                        : '',
-                                    'title' => isset($element['content']['title'])
-                                        ? $element['content']['title']
-                                        : '',
-                                    'file_name' => isset($element['content']['file_name'])
-                                        ? $element['content']['file_name']
-                                        : '',
-                                );
-                                if ($element['content']['type'] === 'library') {
-                                    $src = $this->_addMedia($element['content']['url'], true, $attrs);
-                                } else {
-                                    $src = $element['content']['url'];
-                                }
-                                if ($src and !is_wp_error($src)) {
-                                    $html .= '<img src="' . esc_url($src) . '" alt="' . esc_url($attrs['alt'])
-                                        . '" title="' . esc_url($attrs['title']) . '" />';
-                                }
+                $html = '';
+                switch ($element['type']) {
+                    case 'wysiwyg':
+                        $html .= $element['content'];
+                        break;
+                    case 'text':
+                        $html .= htmlspecialchars($element['content']);
+                        break;
+                    case 'image':
+                        if (isset($element['content']['type'], $element['content']['url'])) {
+                            $attrs = array(
+                                'alt' => isset($element['content']['alt'])
+                                    ? $element['content']['alt']
+                                    : '',
+                                'title' => isset($element['content']['title'])
+                                    ? $element['content']['title']
+                                    : '',
+                                'file_name' => isset($element['content']['file_name'])
+                                    ? $element['content']['file_name']
+                                    : '',
+                            );
+                            if ($element['content']['type'] === 'library') {
+                                $src = $this->_addMedia($element['content']['url'], true, $attrs);
+                            } else {
+                                $src = $element['content']['url'];
                             }
-                            break;
-                        case 'video':
-                        case 'file':
-                            if (isset($element['content']['type'], $element['content']['url'])) {
-                                $attrs = array(
-                                    'description' => isset($element['content']['description'])
-                                        ? $element['content']['description']
-                                        : '',
-                                    'file_name' => isset($element['content']['file_name'])
-                                        ? $element['content']['file_name']
-                                        : '',
-                                );
-                                if ($element['content']['type'] === 'library') {
-                                    $src = $this->_addMedia($element['content']['url'], true, $attrs);
-                                    $name = basename($src);
-                                } else {
-                                    $src = $element['content']['url'];
-                                    $name = $src;
-                                }
-                                if ($src and !is_wp_error($src)) {
-                                    $name = $attrs['description']
-                                        ? $attrs['description']
-                                        : ($attrs['file_name'] ? $attrs['file_name'] : $name);
-                                    $html .= '<a href="' . esc_url($src) . '" title="'
-                                        . esc_url($attrs['description']) . '">' . $name . '</a>';
-                                }
+                            if ($src and !is_wp_error($src)) {
+                                $html .= '<img src="' . esc_url($src) . '" alt="' . esc_attr($attrs['alt'])
+                                    . '" title="' . esc_attr($attrs['title']) . '" />';
                             }
-                            break;
-                        case 'table':
-                            if (isset($element['content']['data'])) {
-                                if (!is_array($element['content']['data'])) {
-                                    $element['content']['data'] = @json_decode($element['content']['data'], true);
-                                }
-                                if (is_array($element['content']['data'])) {
-                                    $html .= '<table>';
-                                    foreach ($element['content']['data'] as $row) {
-                                        $html .= '<tr>';
-                                        foreach ($row as $cell) {
-                                            $html .= '<td>' . $cell . '</td>';
-                                        }
-                                        $html .= '</tr>';
+                        }
+                        break;
+                    case 'video':
+                    case 'file':
+                        if (isset($element['content']['type'], $element['content']['url'])) {
+                            $attrs = array(
+                                'description' => isset($element['content']['description'])
+                                    ? $element['content']['description']
+                                    : '',
+                                'file_name' => isset($element['content']['file_name'])
+                                    ? $element['content']['file_name']
+                                    : '',
+                            );
+                            if ($element['content']['type'] === 'library') {
+                                $src = $this->_addMedia($element['content']['url'], true, $attrs);
+                                $name = basename($src);
+                            } else {
+                                $src = $element['content']['url'];
+                                $name = $src;
+                            }
+                            if ($src and !is_wp_error($src)) {
+                                $name = $attrs['description']
+                                    ? $attrs['description']
+                                    : ($attrs['file_name'] ? $attrs['file_name'] : $name);
+                                $html .= '<a href="' . esc_url($src) . '" title="'
+                                    . esc_attr($attrs['description']) . '">' . $name . '</a>';
+                            }
+                        }
+                        break;
+                    case 'table':
+                        if (isset($element['content']['data'])) {
+                            if (!is_array($element['content']['data'])) {
+                                $element['content']['data'] = @json_decode($element['content']['data'], true);
+                            }
+                            if (is_array($element['content']['data'])) {
+                                $html .= '<table>';
+                                foreach ($element['content']['data'] as $row) {
+                                    $html .= '<tr>';
+                                    foreach ($row as $cell) {
+                                        $html .= '<td>' . $cell . '</td>';
                                     }
-                                    $html .= '<table>';
+                                    $html .= '</tr>';
                                 }
-                            }
-                            break;
-                    }
-                    if ($html) {
-                        $prepend = '';
-                        $append = '';
-                        if (isset($element['options']['tag']) and $element['options']['tag']) {
-                            $element['options']['tag'] = preg_replace('/[^a-z]+/', '',
-                                strtolower($element['options']['tag']));
-                            if ($element['options']['tag']) {
-                                $prepend = '<' . $element['options']['tag'];
-                                if (isset($element['options']['tag_id']) and $element['options']['tag_id']) {
-                                    $prepend .= ' id="' . esc_attr($element['options']['tag_id']) . '"';
-                                }
-                                if (isset($element['options']['tag_class']) and $element['options']['tag_class']) {
-                                    $prepend .= ' class="' . esc_attr($element['options']['tag_class']) . '"';
-                                }
-                                $prepend .= '>';
+                                $html .= '<table>';
                             }
                         }
-                        if (isset($element['options']['tag']) and $element['options']['tag']) {
-                            $append = '</' . $element['options']['tag'] . '>';
+                        break;
+                }
+                if ($html) {
+                    $prepend = '';
+                    $append = '';
+                    if (isset($element['options']['tag']) and $element['options']['tag']) {
+                        $element['options']['tag'] = preg_replace('/[^a-z]+/', '',
+                            strtolower($element['options']['tag']));
+                        if ($element['options']['tag']) {
+                            $prepend = '<' . $element['options']['tag'];
+                            if (isset($element['options']['tag_id']) and $element['options']['tag_id']) {
+                                $prepend .= ' id="' . esc_attr($element['options']['tag_id']) . '"';
+                            }
+                            if (isset($element['options']['tag_class']) and $element['options']['tag_class']) {
+                                $prepend .= ' class="' . esc_attr($element['options']['tag_class']) . '"';
+                            }
+                            $prepend .= '>';
                         }
-                        $post_content[] = $prepend . $html . $append;
                     }
+                    if (isset($element['options']['tag']) and $element['options']['tag']) {
+                        $append = '</' . $element['options']['tag'] . '>';
+                    }
+                    $post_content[] = $prepend . $html . $append;
                 }
             }
             return implode("\n\n", $post_content);
@@ -747,6 +742,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             if (!$this->_options['content_files']) {
                 return false;
             }
+
             $tmp = download_url($url);
             $file_array = array(
                 'name' => isset($attrs['file_name']) ? $attrs['file_name'] : basename($url),
@@ -1044,15 +1040,19 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                         $child_node = $node->childNodes->item($i);
                         $value = $this->_parseSlickplanXmlNode($child_node);
                         if (isset($child_node->tagName)) {
-                            if (!isset($output[$child_node->tagName])) {
-                                $output[$child_node->tagName] = array();
+                            if ($node->tagName === 'body' and is_array($value)) {
+                                $value['type'] = $child_node->tagName;
+                                $output[] = $value;
+                            } else {
+                                if (!isset($output[$child_node->tagName])) {
+                                    $output[$child_node->tagName] = array();
+                                }
+                                $output[$child_node->tagName][] = $value;
                             }
-                            $output[$child_node->tagName][] = $value;
                         } elseif ($value !== '') {
                             $output = $value;
                         }
                     }
-
                     if (is_array($output)) {
                         foreach ($output as $tag => $value) {
                             if (is_array($value) and count($value) === 1) {
