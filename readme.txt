@@ -3,7 +3,7 @@ Contributors: slickplan
 Donate link: http://slickplan.com/
 Tags: slickplan, import, xml
 Requires at least: 3.0
-Tested up to: 4.8
+Tested up to: 4.9.5
 Stable tag: trunk
 License: GPL-3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -19,6 +19,9 @@ When you are finished planning your website project, import your Slickplan websi
 3. Go to the 'Tools' -> 'Import' screen, Click on 'Slickplan'
 
 == Changelog ==
+
+= 2.1.2 =
+* Fix: Non-recognizable XML file when section ID is missing
 
 = 2.1.1 =
 * Fix: Import content blocks in correct order, fixed file download bug
