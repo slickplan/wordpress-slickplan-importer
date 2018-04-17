@@ -1106,8 +1106,12 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                         return true;
                     }
                 } elseif (
-                    isset($array['section']['options']['id'], $array['section']['cells'])
-                    or isset($array['section'][0]['options']['id'], $array['section'][0]['cells'])
+                    (isset($array['section']['cells']) or isset($array['section'][0]['cells']))
+                    and (
+                        isset($array['section']['options']['id'])
+                        or isset($array['section'][0]['options']['id'])
+                        or isset($array['section']['@attributes']['id'])
+                    )
                 ) {
                     return true;
                 }
