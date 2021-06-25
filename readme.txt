@@ -1,12 +1,12 @@
 === Plugin Name ===
 Contributors: slickplan
-Donate link: http://slickplan.com/
+Donate link: https://slickplan.com/
 Tags: slickplan, import, xml
 Requires at least: 3.0
-Tested up to: 4.9.5
+Tested up to: 5.7.2
 Stable tag: trunk
 License: GPL-3.0
-License URI: http://www.gnu.org/licenses/gpl-3.0.html
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 The Slickplan import plugin allows you to quickly import your Slickplan projects into your WordPress site.
 
@@ -19,6 +19,14 @@ When you are finished planning your website project, import your Slickplan websi
 3. Go to the 'Tools' -> 'Import' screen, Click on 'Slickplan'
 
 == Changelog ==
+
+= 2.2 =
+* New: Added basic support for Gutenberg
+* New: Dropped support for PHP 5
+* Fix: Non-recognizable files in Content Planner upload blocks with "multiple" option enabled
+
+= 2.1.3 =
+* Fix: Custom menu name now works as expected
 
 = 2.1.2 =
 * Fix: Non-recognizable XML file when section ID is missing
