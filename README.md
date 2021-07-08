@@ -4,6 +4,8 @@ The Slickplan import plugin allows you to quickly import your [Slickplan.com](ht
 
 When you are finished planning your website project, import your [Slickplan.com](https://slickplan.com) website plan. Upon import, your pages, navigation structure, and content will be instantly ready in your CMS.
 
+_This plugin is compatible with the Gutenberg page builder. It automatically imports your Slickplan's Content Planner blocks into corresponding blocks in WordPress._
+
 [https://wordpress.org/plugins/slickplan-importer/](https://wordpress.org/plugins/slickplan-importer/)
 
 ## Installation
