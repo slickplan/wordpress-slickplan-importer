@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/extend/plugins/slickplan-importer/
 Description: Quickly import your <a href="https://slickplan.com" target="_blank">Slickplan</a> project into your WordPress site. To use go to the <a href="import.php">Tools -> Import</a> screen and select Slickplan.
 Author: Slickplan.com <info@slickplan.com>
 Author URI: https://slickplan.com/
-Version: 2.2.0
+Version: 2.3
 License: GPL-3.0 - https://www.gnu.org/licenses/gpl-3.0.html
 */
 
@@ -107,6 +107,24 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
         private $_wp_oembed = null;
 
         /**
+         * @var string
+         */
+        private $_temp_file = null;
+
+        public function __construct()
+        {
+            parent::__construct();
+
+            $tempDir = get_temp_dir();
+	        if (is_dir($tempDir) && wp_is_writable($tempDir)) {
+                $tempFile = $tempDir . SLICKPLAN_PLUGIN_OPTION . '.json';
+                if (!file_exists($tempFile) || (is_file($tempFile) && wp_is_writable($tempFile))) {
+                    $this->_temp_file = $tempFile;
+                }
+            }
+        }
+
+        /**
          * Importer page routing.
          */
         public function dispatch()
@@ -116,11 +134,13 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 return;
             }
 
-            $step = $_GET['step'] ?? null;
-            $xml = get_option(SLICKPLAN_PLUGIN_OPTION, []);
-
             $this->_displayHeader();
 
+            if (is_wp_error($xml = $this->_getPluginData())) {
+                return $xml;
+            }
+
+            $step = $_GET['step'] ?? null;
             if (
                 ($step === 'map' and isset($xml['pages']))
                 or ($step === 'upload' and isset($_FILES) and !empty($_FILES))
@@ -135,6 +155,8 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 if (is_wp_error($result)) {
                     $this->_displayError($result->get_error_message());
                 }
+            } elseif ($step === 'mapping' and isset($xml['pages'], $xml['import_form'])) {
+                $this->_displayImportMapping();
             } elseif ($step === 'import' and isset($xml['pages'], $xml['import_options'])) {
                 $this->_displayAjaxImporter();
             } elseif ($step === 'done' and isset($xml['summary'])) {
@@ -166,9 +188,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 if (is_wp_error($result)) {
                     $this->_displayError($result->get_error_message());
                 } else {
-                    update_option(SLICKPLAN_PLUGIN_OPTION, $result);
-                    wp_redirect($this->_getAdminUrl('map'));
-                    exit;
+                    $this->_setPluginData($result, $this->_getAdminUrl('map'));
                 }
             }
         }
@@ -219,8 +239,11 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
          */
         public function ajaxImport(array $form): array
         {
+            if (is_wp_error($xml = $this->_getPluginData())) {
+                return $xml;
+            }
+
             $result = [];
-            $xml = get_option(SLICKPLAN_PLUGIN_OPTION, []);
             if (isset($xml['import_options'])) {
                 $this->_options = $xml['import_options'];
                 if (isset($xml['pages'][$form['page']]) and is_array($xml['pages'][$form['page']])) {
@@ -241,11 +264,11 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 if (isset($form['last']) and $form['last']) {
                     $result['last'] = $form['last'];
                     $this->_checkForInternalLinks();
-                    update_option(SLICKPLAN_PLUGIN_OPTION, '');
+                    $this->_setPluginData();
                 }
                 else {
                     $xml['import_options'] = $this->_options;
-                    update_option(SLICKPLAN_PLUGIN_OPTION, $xml);
+                    $this->_setPluginData($xml);
                 }
             }
             return $result;
@@ -266,98 +289,79 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             return get_admin_url(null, $url);
         }
 
-        /**
-         * Display importer options and page mapping.
-         */
-        private function _displayImportOptions()
+        private function _getPluginData(bool $validate = false)
         {
-            $xml = get_option(SLICKPLAN_PLUGIN_OPTION, []);
-            if (!$xml or !$this->_isCorrectSlickplanXmlFile($xml, true)) {
+            if ($this->_temp_file) {
+                $xml = is_file($this->_temp_file)
+                    ? wp_json_file_decode($this->_temp_file, ['associative' => true])
+                    : null;
+            } else {
+                $xml = get_option(SLICKPLAN_PLUGIN_OPTION);
+            }
+
+            if ($validate && (!$xml or !$this->_isCorrectSlickplanXmlFile($xml, true))) {
                 return new WP_Error(SLICKPLAN_PLUGIN_ID, 'Invalid file content.');
             }
-            if (isset($_POST['slickplan_importer']) and is_array($_POST['slickplan_importer'])) {
-                $form = $_POST['slickplan_importer'];
-                if (
-                    isset($form['settings_language'], $xml['settings']['language'])
-                    and $form['settings_language']
-                ) {
-                    $this->_changeLanguage($xml['settings']['language']);
-                }
-                if (isset($form['settings_title']) and $form['settings_title']) {
-                    $title = (isset($xml['settings']['title']) and $xml['settings']['title'])
-                        ? $xml['settings']['title']
-                        : $xml['title'];
-                    update_option('blogname', $title);
-                }
-                if (isset($form['settings_tagline']) and $form['settings_tagline']) {
-                    update_option('blogdescription', $xml['settings']['tagline']);
-                }
-                $this->_options = [
-                    'titles' => $form['titles_change'] ?? '',
-                    'content' => $form['content'] ?? '',
-                    'content_files' => (
-                        isset($form['content'], $form['content_files'])
-                        and $form['content'] === 'contents'
-                        and $form['content_files']
-                    ),
-                    'create_menu' => (isset($form['create_menu']) and $form['create_menu']),
-                    'users' => $form['users_map'] ?? [],
-                    'internal_links' => [],
-                    'imported_pages' => [],
-                ];
-                if ($this->_options['create_menu']) {
-                    $menu_name = $menu_name_orig = (isset($form['menu_name']) and $form['menu_name'])
-                        ? $form['menu_name']
-                        : 'Slickplan';
-                    $i = 0;
-                    while (get_term_by('name', $menu_name, 'nav_menu')) {
-                        $menu_name = $menu_name_orig . ' ' . (++$i);
-                    }
-                    $this->_options['create_menu'] = wp_create_nav_menu($menu_name);
-                } else {
-                    $this->_options['create_menu'] = false;
-                }
-                if ($this->_options['content_files']) {
-                    // Redirect to AJAX importer
-                    $xml['import_options'] = $this->_options;
-                    update_option(SLICKPLAN_PLUGIN_OPTION, $xml);
-                    wp_redirect($this->_getAdminUrl('import'));
-                } else {
-                    // There is no files, so we can import pages faster than using AJAX importer
-                    foreach (['home', '1', 'util', 'foot'] as $type) {
-                        if (isset($xml['sitemap'][$type]) and is_array($xml['sitemap'][$type])) {
-                            $this->_importPages($xml['sitemap'][$type]);
-                        }
-                    }
 
-                    $this->_checkForInternalLinks();
+            return is_array($xml) ? $xml : [];
+        }
 
-                    update_option(SLICKPLAN_PLUGIN_OPTION, [
-                        'summary' => implode($this->_summary),
-                    ]);
-                    do_action('import_done', SLICKPLAN_PLUGIN_OPTION);
-                    wp_redirect($this->_getAdminUrl('done'));
+        private function _setPluginData($data = null, $redirect = null)
+        {
+            if ($this->_temp_file) {
+                if (is_null($data)) {
+                    wp_delete_file($this->_temp_file);
+                } else {
+                    file_put_contents($this->_temp_file, wp_json_encode($data));
                 }
+            } else {
+                if (is_null($data)) {
+                    delete_option(SLICKPLAN_PLUGIN_OPTION);
+                } else {
+                    update_option(SLICKPLAN_PLUGIN_OPTION, $data);
+                }
+            }
+            if ($redirect) {
+                wp_redirect($redirect);
                 exit;
             }
+        }
 
+        private function _displayImportOptions()
+        {
+            if (is_wp_error($xml = $this->_getPluginData(true))) {
+                return $xml;
+            }
+
+            if (isset($_POST['slickplan_importer']) and is_array($_POST['slickplan_importer'])) {
+                if ($_POST['slickplan_importer']['page_type'] === '@') {
+                    $xml['import_form'] = $_POST['slickplan_importer'];
+                    $this->_setPluginData($xml, $this->_getAdminUrl('mapping'));
+                }
+                $this->_doImport($_POST['slickplan_importer'], $xml);
+            }
+
+            $allLanguages = $this->_getLanguages();
+            $content_languages = [];
             $no_of_files = 0;
             $filesize_total = [];
             if (isset($xml['pages']) and is_array($xml['pages'])) {
                 foreach ($xml['pages'] as $page) {
-                    if (isset($page['contents']['body']) and is_array($page['contents']['body'])) {
-                        foreach ($page['contents']['body'] as $body) {
-                            if (isset($body['type']) and ($body['type'] === 'image' or $body['type'] === 'video' or $body['type'] === 'file')) {
-                                foreach ($this->_getMediaElementArray($body) as $item) {
-                                    if (isset($item['type']) and $item['type'] === 'library') {
-                                        ++$no_of_files;
-                                    }
-                                    if (isset($item['file_size'], $item['file_id']) and $item['file_size']) {
-                                        $filesize_total[$item['file_id']] = (int)$item['file_size'];
-                                    }
-                                }
+                    if (isset($page['contents'][0]['@attributes']['lang'])) {
+                        foreach ($page['contents'] as $row) {
+                            if (isset($row['@attributes']['lang'], $allLanguages[$row['@attributes']['lang']]['name']) and $row['@attributes']['lang']) {
+                                $content_languages[$row['@attributes']['lang']] = $allLanguages[$row['@attributes']['lang']]['name'];
+                            }
+                            if (isset($row['body']) && is_array($row['body'])) {
+                                $filesData = $this->_sumFiles($row['body']);
+                                $no_of_files += $filesData[0];
+                                $filesize_total = array_merge($filesize_total, $filesData[1]);
                             }
                         }
+                    } elseif (isset($page['contents']['body']) and is_array($page['contents']['body'])) {
+                        $filesData = $this->_sumFiles($page['contents']['body']);
+                        $no_of_files += $filesData[0];
+                        $filesize_total = array_merge($filesize_total, $filesData[1]);
                     }
                 }
             }
@@ -367,13 +371,119 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             require_once SLICKPLAN_PLUGIN_PATH . 'views/options.php';
         }
 
+        private function _displayImportMapping()
+        {
+            if (is_wp_error($xml = $this->_getPluginData(true))) {
+                return $xml;
+            }
+
+            if (isset($_POST['slickplan_importer']) and is_array($_POST['slickplan_importer'])) {
+                $this->_doImport(array_merge($xml['import_form'] ?? [], $_POST['slickplan_importer']), $xml);
+            }
+
+            require_once SLICKPLAN_PLUGIN_PATH . 'views/mapping.php';
+        }
+
+        private function _displayAjaxImporter()
+        {
+            if (is_wp_error($xml = $this->_getPluginData())) {
+                return $xml;
+            }
+
+            require_once SLICKPLAN_PLUGIN_PATH . 'views/import.php';
+        }
+
         /**
          * Display AJAX import page.
          */
-        private function _displayAjaxImporter()
+        private function _doImport(array $form, array $xml)
         {
-            $xml = get_option(SLICKPLAN_PLUGIN_OPTION, []);
-            require_once SLICKPLAN_PLUGIN_PATH . 'views/import.php';
+            if (
+                isset($form['settings_language'], $xml['settings']['language'])
+                and $form['settings_language']
+            ) {
+                $this->_changeLanguage($xml['settings']['language']);
+            }
+            if (isset($form['settings_title']) and $form['settings_title']) {
+                $title = (isset($xml['settings']['title']) and $xml['settings']['title'])
+                    ? $xml['settings']['title']
+                    : $xml['title'];
+                update_option('blogname', $title);
+            }
+            if (isset($form['settings_tagline']) and $form['settings_tagline']) {
+                update_option('blogdescription', $xml['settings']['tagline']);
+            }
+            $this->_options = [
+                'titles' => $form['titles_change'] ?? '',
+                'content' => $form['content'] ?? '',
+                'content_lang' => $form['content_lang'] ?? '',
+                'content_files' => (
+                    isset($form['content'], $form['content_files'])
+                    and $form['content'] === 'contents'
+                    and $form['content_files']
+                ),
+                'create_menu' => (isset($form['create_menu']) and $form['create_menu']),
+                'post_type' => $form['page_type'] ?? 'page',
+                'users' => $form['users_map'] ?? [],
+                'internal_links' => [],
+                'imported_pages' => [],
+            ];
+            $postTypes = get_post_types(['public' => true], 'objects');
+            $this->_options['post_type_hierarchical'] = ($postTypes[$this->_options['post_type']] ?? $postTypes['page'])->hierarchical;
+            if ($this->_options['create_menu']) {
+                $menu_name = $menu_name_orig = (isset($form['menu_name']) and $form['menu_name'])
+                    ? $form['menu_name']
+                    : 'Slickplan';
+                $i = 0;
+                while (get_term_by('name', $menu_name, 'nav_menu')) {
+                    $menu_name = $menu_name_orig . ' ' . (++$i);
+                }
+                $this->_options['create_menu'] = wp_create_nav_menu($menu_name);
+            } else {
+                $this->_options['create_menu'] = false;
+            }
+            if (isset($form['content_lang']) && $form['content_lang']) {
+                foreach ($xml['pages'] as $pageId => $pageData) {
+                    if (
+                        isset($xml['pages'][$pageId]['contents'])
+                        && is_array($xml['pages'][$pageId]['contents'])
+                        && array_keys($xml['pages'][$pageId]['contents']) === range(0, count($xml['pages'][$pageId]['contents']) - 1)
+                    ) {
+                        $xml['pages'][$pageId]['contents'] = array_reduce($xml['pages'][$pageId]['contents'], function ($result, $item) use ($form) {
+                            if ($item['@attributes']['lang'] === $form['content_lang']) {
+                                return $item;
+                            }
+                            return $result;
+                        }, []);
+                    }
+                }
+            }
+            if ($this->_options['content_files']) {
+                // Redirect to AJAX importer
+                $xml['import_options'] = $this->_options;
+                $this->_setPluginData($xml);
+            } else {
+                if (isset($form['content_lang']) && $form['content_lang']) {
+                    $this->_setPluginData($xml);
+                }
+
+                // There is no files, so we can import pages faster than using AJAX importer
+                foreach (['home', '1', 'util', 'foot'] as $type) {
+                    if (isset($xml['sitemap'][$type]) and is_array($xml['sitemap'][$type])) {
+                        $this->_importPages($xml['sitemap'][$type]);
+                    }
+                }
+
+                $this->_checkForInternalLinks();
+
+                $this->_setPluginData([
+                    'summary' => implode($this->_summary),
+                ]);
+                do_action('import_done', SLICKPLAN_PLUGIN_OPTION);
+            }
+
+            wp_redirect($this->_getAdminUrl($this->_options['content_files'] ? 'import' : 'done'));
+            exit;
         }
 
         /**
@@ -384,7 +494,10 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
          */
         private function _importPages(array $pages, int $parent_id = 0)
         {
-            $xml = get_option(SLICKPLAN_PLUGIN_OPTION, []);
+            if (is_wp_error($xml = $this->_getPluginData())) {
+                return $xml;
+            }
+
             foreach ($pages as $page) {
                 if (isset($xml['pages'][$page['id']])) {
                     $page += $xml['pages'][$page['id']];
@@ -404,21 +517,25 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
         {
             $this->_order += 10;
 
+            if (!$this->_options['post_type_hierarchical']) {
+                $parent_id = 0;
+            }
+
             $page = [
                 'post_status' => 'publish',
                 'post_content' => '',
-                'post_type' => 'page',
+                'post_type' => $this->_options['post_type'],
                 'post_title' => $this->_getFormattedTitle($data),
                 'menu_order' => $this->_order,
                 'post_parent' => $parent_id,
             ];
 
             // Set post content
-            if ($this->_options['content'] === 'desc') {
+            if (($this->_options['content'] ?? null) === 'desc') {
                 if (isset($data['desc']) and !empty($data['desc'])) {
                     $page['post_content'] = $this->_getFormattedContent($data['desc']);
                 }
-            } elseif ($this->_options['content'] === 'contents') {
+            } elseif (($this->_options['content'] ?? null) === 'contents') {
                 if (
                     isset($data['contents']['body'])
                     and is_array($data['contents']['body'])
@@ -455,7 +572,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 }
             }
 
-            $page_id = wp_insert_post($page);
+            $page_id = wp_insert_post($page, true);
             if (is_wp_error($page_id)) {
                 $page['ID'] = false;
                 $page['error'] = $page_id->get_error_message();
@@ -464,7 +581,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 $page['ID'] = (int)$page_id;
 
                 // Add page to nav menu
-                if ($this->_options['create_menu']) {
+                if ($this->_options['create_menu'] ?? null) {
                     $menu_parent = 0;
                     if ($page['post_parent']) {
                         $menu_items = (array)wp_get_nav_menu_items($this->_options['create_menu'], [
@@ -787,7 +904,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                                     $img = '<img src="' . esc_url($attachment['url'])
                                         .'" alt="' . esc_attr($attrs['alt'])
                                         .'" title="' . esc_attr($attrs['title'])
-                                        .'" class="wp-image-' . $attachment['id'] . '"'
+                                        .'" class="wp-image-' . esc_attr($attachment['id']) . '"'
                                         .' />';
                                     $html[] = get_comment_delimited_block_content(
                                         'core/image',
@@ -922,14 +1039,14 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             $title = (isset($data['contents']['page_title']) and $data['contents']['page_title'])
                 ? $data['contents']['page_title']
                 : ($data['text'] ?? '');
-            if ($this->_options['titles'] === 'ucfirst') {
+            if (($this->_options['titles'] ?? null) === 'ucfirst') {
                 if (function_exists('mb_strtolower')) {
                     $title = mb_strtolower($title);
                     $title = mb_strtoupper(mb_substr($title, 0, 1)) . mb_substr($title, 1);
                 } else {
                     $title = ucfirst(strtolower($title));
                 }
-            } elseif ($this->_options['titles'] === 'ucwords') {
+            } elseif (($this->_options['titles'] ?? null) === 'ucwords') {
                 if (function_exists('mb_convert_case')) {
                     $title = mb_convert_case($title, MB_CASE_TITLE);
                 } else {
@@ -948,7 +1065,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
          */
         private function _addMedia($url, array $attrs = [])
         {
-            if (!$this->_options['content_files']) {
+            if (!($this->_options['content_files'] ?? null)) {
                 return false;
             }
 
@@ -959,7 +1076,6 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             ];
             $file_array['filename'] = $file_array['name'];
 
-            // Check for download errors
             if (is_wp_error($tmp)) {
                 @unlink($file_array['tmp_name']);
                 $file_array['error'] = $tmp->get_error_message();
@@ -985,7 +1101,6 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 $options
             );
 
-            // Check for handle sideload errors.
             if (is_wp_error($id)) {
                 @unlink($file_array['tmp_name']);
                 $file_array['error'] = $id->get_error_message();
@@ -1024,15 +1139,16 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
          */
         private function _displayUploadForm(bool $hide_info = false)
         {
+            $this->_setPluginData();
             echo '<div class="narrow">';
             if (!$hide_info) {
-                echo '<div class="updated" style="border-color: #FFBA00">',
+                echo '<div class="notice notice-warning">',
                     '<p>The Slickplan Importer plugin allows you to quickly import your ',
                     '<a href="https://slickplan.com" target="_blank">Slickplan</a> projects into your WordPress site.</p>',
                     '<p>Upon import, your pages, navigation structure, and content will be instantly ready in your CMS.</p>',
                     '</div>';
-                echo '<div class="updated" style="border-color: #FFBA00">',
-                    '<p>Pick a XML file to upload and click Import.</p>',
+                echo '<div class="notice notice-warning notice-alt">',
+                    '<p>Pick an XML file to upload:</p>',
                     '</div>';
             }
             ob_start();
@@ -1049,11 +1165,14 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
          */
         private function _displaySummary()
         {
-            $xml = get_option(SLICKPLAN_PLUGIN_OPTION, []);
+            if (is_wp_error($xml = $this->_getPluginData())) {
+                return $xml;
+            }
+
             if (isset($xml['summary']) and $xml['summary']) {
                 require_once SLICKPLAN_PLUGIN_PATH . 'views/import.php';
             }
-            update_option(SLICKPLAN_PLUGIN_OPTION, '');
+            $this->_setPluginData();
         }
 
         /**
@@ -1063,8 +1182,8 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
         {
             echo '<div class="wrap"> <h2>Slickplan Importer</h2>';
 
-            if (!class_exists('DomDocument') or version_compare(PHP_VERSION, '7.0.0', '<')) {
-                $this->_displayError('Sorry! This importer requires PHP 7 and DomDocument extensions.');
+            if (!class_exists('DomDocument') or version_compare(PHP_VERSION, '7.1.0', '<')) {
+                $this->_displayError('Sorry! This importer requires PHP 7.1+ and DOM extension.');
             }
         }
 
@@ -1074,6 +1193,33 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
         private function _displayFooter()
         {
             echo '</div>';
+        }
+
+        public function displayDropdown(string $name, ?string $label = null, array $options = [], $selected = null): string
+        {
+            $id = sanitize_title('slickplan-importer-form-' . $name);
+            $attrs = [
+                'name' => 'slickplan_importer[' . $name . ']',
+                'id' => $id,
+            ];
+            $html = '';
+            if ($label) {
+                $html .= '<label for="' . $id . '">' . $label . ':</label> ';
+            }
+            $html .= '<select';
+            foreach ($attrs as $key => $value) {
+                $html .= ' ' . $key . '="' . esc_attr($value) . '"';
+            }
+            $html .= '>';
+            foreach ($options as $value => $name) {
+                $value = $name['key'] ?? $name['name'] ?? $value;
+                $name = $name['value'] ?? $name['label'] ?? $name;
+                $html .= '<option value="' . esc_attr($value) . '"'
+                    . ($selected === $value ? ' selected' : '')
+                    . '>' . esc_attr($name) . '</option>';
+            }
+            $html .= '</select>';
+            return $html;
         }
 
         /**
@@ -1115,7 +1261,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             foreach ($attrs as $key => $value) {
                 $html .= ' ' . $key . '="' . esc_attr($value) . '"';
             }
-            $html .= '>' . $label . '</label>';
+            $html .= '> ' . $label . '</label>';
             if (is_array($description)) {
                 $html .= implode($description);
             } elseif ($description) {
@@ -1155,8 +1301,38 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
         {
             wp_dropdown_users([
                 'selected' => '',
-                'name' => 'slickplan_importer[' . $name . ']',
+                'name' => 'slickplan_importer[' . esc_attr($name) . ']',
             ]);
+        }
+
+        /**
+         * Display dropdown element with users.
+         */
+        public function displayPageTypesDropdown(string $name, bool $includeManually = false, ?string $label = 'Import as', bool $singularName = false): void
+        {
+            $options = get_post_types(['public' => true], 'objects');
+            usort($options, function ($a, $b) use ($singularName) {
+                $a = $singularName ? $a->labels->singular_name : $a->label;
+                $b = $singularName ? $b->labels->singular_name : $a->label;
+                return 0 > strcmp($a, $b) ? -1 : 1;
+            });
+            $options = array_filter(array_map(function ($item) use ($singularName) {
+                if (
+                    $item->name === 'attachment'
+                    || ($item->capability_type !== 'post' && $item->capability_type !== 'page')
+                ) {
+                    return null;
+                }
+                $label = $singularName ? $item->labels->singular_name : $item->label;
+                if (!$item->hierarchical) {
+                    $label .= ' (non-hierarchical)';
+                }
+                return ['key' => $item->name, 'value' => $label];
+            }, $options));
+            if ($includeManually) {
+                $options[] = ['key' => '@', 'value' => 'Select manually per page (next step)'];
+            }
+            echo $this->displayDropdown($name, $label, $options, 'page');
         }
 
         /**
@@ -1168,7 +1344,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
         private function _parseSlickplanXml(string $input_xml)
         {
             $input_xml = trim($input_xml);
-            if (substr($input_xml, 0, 5) === '<?xml') {
+            if (str_starts_with($input_xml, '<?xml')) {
                 try {
                     $xml = new DomDocument('1.0', 'UTF-8');
                     $xml->xmlStandalone = false;
@@ -1220,9 +1396,9 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                     }
                 }
             }
-            return new WP_Error(SLICKPLAN_PLUGIN_ID, 'Invalid file format. Please use XML file you exported from '
-                . 'Slickplan (<a href="https://help.slickplan.com/hc/en-us/articles/202487180" '
-                . 'target="_blank">How do I export my sitemaps?</a>)');
+            return new WP_Error(SLICKPLAN_PLUGIN_ID, 'Invalid file format. Please use XML file exported from '
+                . 'Slickplan (<a href="https://help.slickplan.com/hc/en-us/articles/202487180-How-do-I-export-my-sitemaps-" '
+                . 'target="_blank">Need help?</a>)');
         }
 
         /**
@@ -1235,7 +1411,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
         {
             if (isset($node->nodeType)) {
                 if ($node->nodeType === XML_CDATA_SECTION_NODE or $node->nodeType === XML_TEXT_NODE) {
-                    return trim($node->textContent);
+                    return trim(htmlspecialchars_decode($node->textContent));
                 } elseif ($node->nodeType === XML_ELEMENT_NODE) {
                     $output = [];
                     for ($i = 0, $j = $node->childNodes->length; $i < $j; ++$i) {
@@ -1508,6 +1684,30 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             return $slug ? sanitize_title($slug) : '';
         }
 
+        private function _sumFiles(array $bodyItems): array
+        {
+            $no_of_files = 0;
+            $filesize_total = [];
+            foreach ($bodyItems as $body) {
+                if (isset($body['type']) and ($body['type'] === 'image' or $body['type'] === 'video' or $body['type'] === 'file')) {
+                    foreach ($this->_getMediaElementArray($body) as $item) {
+                        if (isset($item['type']) and $item['type'] === 'library') {
+                            ++$no_of_files;
+                        }
+                        if (isset($item['file_size'], $item['file_id']) and $item['file_size']) {
+                            $filesize_total[$item['file_id']] = (int)$item['file_size'];
+                        }
+                    }
+                }
+            }
+            return [$no_of_files, $filesize_total];
+        }
+
+        private function _getLanguages()
+        {
+            return json_decode(file_get_contents(SLICKPLAN_PLUGIN_PATH . 'assets/languages.json'), true);
+        }
+
         /**
          * @return bool
          */
@@ -1604,10 +1804,6 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
         if (isset($_POST['slickplan']) and is_array($_POST['slickplan'])) {
             $result = $slickplan->ajaxImport($_POST['slickplan']);
         }
-        ob_clean();
-        header('Content-Type: application/json');
-        echo json_encode($result);
-        wp_die();
+        wp_send_json($result);
     }
-
 }

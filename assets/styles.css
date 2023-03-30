@@ -12,16 +12,40 @@
     padding-top: 4px;
 }
 
-#slickplan-importer table.users-mapping td {
-    padding: 5px 0;
-}
-
 #slickplan-importer td[colspan="2"] {
     padding: 0;
 }
 
 #slickplan-importer .slickplan-summary {
     overflow: auto;
+}
+
+#slickplan-importer .slickplan-summary .dashicons-update {
+    animation: rotation 2s infinite linear;
+}
+
+#slickplan-importer .is-flex {
+    display: flex;
+    gap: 1em;
+    align-items: center;
+}
+
+#slickplan-importer .is-flex > * {
+    margin: 0;
+}
+
+#slickplan-importer .card {
+    margin: 0;
+    padding: 0.5em 1em;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    gap: 1em;
+    align-items: center;
+}
+
+#slickplan-importer .card + .card {
+    margin-top: 1em;
 }
 
 #slickplan-progressbar {

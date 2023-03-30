@@ -1,0 +1,297 @@
+{
+    "ar": {
+        "iso_code_2": "ar",
+        "name": "Arabic",
+        "name_local": "\u0627\u0644\u0639\u0631\u0628\u064a\u0629"
+    },
+    "az": {
+        "iso_code_2": "az",
+        "name": "Azerbaijani",
+        "name_local": "Az\u0259rbaycan dili"
+    },
+    "bg_BG": {
+        "iso_code_2": "bg",
+        "name": "Bulgarian",
+        "name_local": "\u0411\u044a\u043b\u0433\u0430\u0440\u0441\u043a\u0438"
+    },
+    "bs_BA": {
+        "iso_code_2": "bs",
+        "name": "Bosnian",
+        "name_local": "Bosanski"
+    },
+    "ca": {
+        "iso_code_2": "ca",
+        "name": "Catalan",
+        "name_local": "Catal\u00e0"
+    },
+    "cs_CZ": {
+        "iso_code_2": "cs",
+        "name": "Czech",
+        "name_local": "Čeština"
+    },
+    "cy": {
+        "iso_code_2": "cy",
+        "name": "Welsh",
+        "name_local": "Cymraeg"
+    },
+    "da_DK": {
+        "iso_code_2": "da",
+        "name": "Danish",
+        "name_local": "Dansk"
+    },
+    "de_CH": {
+        "iso_code_2": "de",
+        "name": "German (Switzerland)",
+        "name_local": "Deutsch (Schweiz)"
+    },
+    "de_DE": {
+        "iso_code_2": "de",
+        "name": "German",
+        "name_local": "Deutsch"
+    },
+    "el": {
+        "iso_code_2": "el",
+        "name": "Greek",
+        "name_local": "\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac"
+    },
+    "en_AU": {
+        "iso_code_2": "en",
+        "name": "English (Australia)",
+        "name_local": "English (Australia)"
+    },
+    "en_GB": {
+        "iso_code_2": "en",
+        "name": "English (UK)",
+        "name_local": "English (UK)"
+    },
+    "en_CA": {
+        "iso_code_2": "en",
+        "name": "English (Canada)",
+        "name_local": "English (Canada)"
+    },
+    "en_US": {
+        "iso_code_2": "en",
+        "name": "English (US)",
+        "name_local": "English (US)"
+    },
+    "eo": {
+        "iso_code_2": "eo",
+        "name": "Esperanto",
+        "name_local": "Esperanto"
+    },
+    "es_MX": {
+        "iso_code_2": "es",
+        "name": "Spanish (Mexico)",
+        "name_local": "Espa\u00f1ol de M\u00e9xico"
+    },
+    "es_PE": {
+        "iso_code_2": "es",
+        "name": "Spanish (Peru)",
+        "name_local": "Espa\u00f1ol de Per\u00fa"
+    },
+    "es_ES": {
+        "iso_code_2": "es",
+        "name": "Spanish (Spain)",
+        "name_local": "Espa\u00f1ol"
+    },
+    "es_CL": {
+        "iso_code_2": "es",
+        "name": "Spanish (Chile)",
+        "name_local": "Espa\u00f1ol de Chile"
+    },
+    "eu": {
+        "iso_code_2": "eu",
+        "name": "Basque",
+        "name_local": "Euskara"
+    },
+    "fa_IR": {
+        "iso_code_2": "fa",
+        "name": "Persian",
+        "name_local": "\u0641\u0627\u0631\u0633\u06cc"
+    },
+    "fi": {
+        "iso_code_2": "fi",
+        "name": "Finnish",
+        "name_local": "Suomi"
+    },
+    "fr_FR": {
+        "iso_code_2": "fr",
+        "name": "French",
+        "name_local": "Fran\u00e7ais"
+    },
+    "gd": {
+        "iso_code_2": "gd",
+        "name": "Scottish Gaelic",
+        "name_local": "G\u00e0idhlig"
+    },
+    "gl_ES": {
+        "iso_code_2": "gl",
+        "name": "Galician",
+        "name_local": "Galego"
+    },
+    "haz": {
+        "iso_code_2": "haz",
+        "name": "Hazaragi",
+        "name_local": "\u0647\u0632\u0627\u0631\u0647 \u06af\u06cc"
+    },
+    "he_IL": {
+        "iso_code_2": "he",
+        "name": "Hebrew",
+        "name_local": "\u05e2\u05b4\u05d1\u05b0\u05e8\u05b4\u05d9\u05ea"
+    },
+    "hr": {
+        "iso_code_2": "hr",
+        "name": "Croatian",
+        "name_local": "Hrvatski"
+    },
+    "hu_HU": {
+        "iso_code_2": "hu",
+        "name": "Hungarian",
+        "name_local": "Magyar"
+    },
+    "id_ID": {
+        "iso_code_2": "id",
+        "name": "Indonesian",
+        "name_local": "Bahasa Indonesia"
+    },
+    "is_IS": {
+        "iso_code_2": "is",
+        "name": "Icelandic",
+        "name_local": "\u00cdslenska"
+    },
+    "it_IT": {
+        "iso_code_2": "it",
+        "name": "Italian",
+        "name_local": "Italiano"
+    },
+    "ja": {
+        "iso_code_2": "ja",
+        "name": "Japanese",
+        "name_local": "\u65e5\u672c\u8a9e"
+    },
+    "ko_KR": {
+        "iso_code_2": "ko",
+        "name": "Korean",
+        "name_local": "\ud55c\uad6d\uc5b4"
+    },
+    "lt_LT": {
+        "iso_code_2": "lt",
+        "name": "Lithuanian",
+        "name_local": "Lietuvi\u0173 kalba"
+    },
+    "lv_LV": {
+        "iso_code_2": "lv",
+        "name": "Latvian",
+        "name_local": "Latvie\u0161u valoda"
+    },
+    "ms": {
+        "iso_code_2": "ms",
+        "name": "Malay",
+        "name_local": "\u0628\u0647\u0627\u0633 \u0645\u0644\u0627\u064a\u0648"
+    },
+    "my_MM": {
+        "iso_code_2": "my",
+        "name": "Myanmar (Burmese)",
+        "name_local": "\u1017\u1019\u102c\u1005\u102c"
+    },
+    "nb_NO": {
+        "iso_code_2": "nb",
+        "name": "Norwegian (Bokm\u00e5l)",
+        "name_local": "Norsk bokm\u00e5l"
+    },
+    "nl_NL": {
+        "iso_code_2": "nl",
+        "name": "Dutch",
+        "name_local": "Nederlands"
+    },
+    "nn_NO": {
+        "iso_code_2": "nn",
+        "name": "Norwegian (Nynorsk)",
+        "name_local": "Norsk nynorsk"
+    },
+    "pl_PL": {
+        "iso_code_2": "pl",
+        "name": "Polish",
+        "name_local": "Polski"
+    },
+    "ps": {
+        "iso_code_2": "ps",
+        "name": "Pashto",
+        "name_local": "\u067e\u069a\u062a\u0648"
+    },
+    "pt_BR": {
+        "iso_code_2": "pt",
+        "name": "Portuguese (Brazil)",
+        "name_local": "Portugu\u00eas do Brasil"
+    },
+    "pt_PT": {
+        "iso_code_2": "pt",
+        "name": "Portuguese (Portugal)",
+        "name_local": "Portugu\u00eas"
+    },
+    "ro_RO": {
+        "iso_code_2": "ro",
+        "name": "Romanian",
+        "name_local": "Rom\u00e2n\u0103"
+    },
+    "ru_RU": {
+        "iso_code_2": "ru",
+        "name": "Russian",
+        "name_local": "\u0420\u0443\u0441\u0441\u043a\u0438\u0439"
+    },
+    "sk_SK": {
+        "iso_code_2": "sk",
+        "name": "Slovak",
+        "name_local": "Sloven\u010dina"
+    },
+    "sl_SI": {
+        "iso_code_2": "sl",
+        "name": "Slovenian",
+        "name_local": "Sloven\u0161\u010dina"
+    },
+    "sq": {
+        "iso_code_2": "sq",
+        "name": "Albanian",
+        "name_local": "Shqip"
+    },
+    "sr_RS": {
+        "iso_code_2": "sr",
+        "name": "Serbian",
+        "name_local": "\u0421\u0440\u043f\u0441\u043a\u0438 \u0458\u0435\u0437\u0438\u043a"
+    },
+    "sv_SE": {
+        "iso_code_2": "sv",
+        "name": "Swedish",
+        "name_local": "Svenska"
+    },
+    "th": {
+        "iso_code_2": "th",
+        "name": "Thai",
+        "name_local": "\u0e44\u0e17\u0e22"
+    },
+    "tr_TR": {
+        "iso_code_2": "tr",
+        "name": "Turkish",
+        "name_local": "T\u00fcrk\u00e7e"
+    },
+    "uk": {
+        "iso_code_2": "uk",
+        "name": "Ukrainian",
+        "name_local": "\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430"
+    },
+    "vi_VN": {
+        "iso_code_2": "vi",
+        "name": "Vietnamese",
+        "name_local": "Ti\u1ebfng Vi\u1ec7t"
+    },
+    "zh_TW": {
+        "iso_code_2": "zh",
+        "name": "Chinese (Taiwan)",
+        "name_local": "\u7e41\u9ad4\u4e2d\u6587"
+    },
+    "zh_CN": {
+        "iso_code_2": "zh",
+        "name": "Chinese (China)",
+        "name_local": "\u7b80\u4f53\u4e2d\u6587"
+    }
+}
