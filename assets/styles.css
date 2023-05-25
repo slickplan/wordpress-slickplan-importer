@@ -74,3 +74,53 @@
     font-weight: bold;
     text-shadow: 1px 1px 0 #fff;
 }
+
+#slickplan-mapping-list .select-childs-page {
+    display: inline-block;
+    scale: 0.85;
+}
+
+#slickplan-mapping-list .change-page {
+    display: none;
+    margin-left: 1em;
+}
+
+#slickplan-mapping-list tr:hover .change-page {
+    display: inline;
+}
+
+#slickplan-mapping-list > tr.active .column-title strong {
+    font-weight: 700 !important;
+}
+
+#slickplan-floating {
+    width: calc(100% - 2px - 9px);
+    border: 1px solid #b4b5b7;
+    padding: 15px 0 15px 9px;
+    background: #f0f6fc;
+    position: sticky;
+    top: 31px;
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-items: flex-start;
+    gap: 7px;
+    margin: 20px 0;
+    z-index: 1;
+}
+
+#slickplan-floating.hidden div + div + div,
+#slickplan-floating.hidden button,
+#slickplan-floating.hidden select {
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0;
+}
+
+#slickplan-floating select {
+    width: 125px;
+}
+
+#slickplan-floating select[name^="custom_type_list_"] {
+    display: none;
+}

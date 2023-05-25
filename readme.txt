@@ -3,7 +3,7 @@ Contributors: slickplan
 Donate link: https://slickplan.com/
 Tags: slickplan, import, xml
 Requires at least: 4.0
-Tested up to: 6.2
+Tested up to: 6.2.2
 Stable tag: trunk
 License: GPL-3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -21,6 +21,9 @@ This plugin is compatible with the Gutenberg page builder. It automatically impo
 3. Go to the 'Tools' -> 'Import' screen, Click on 'Slickplan'
 
 == Changelog ==
+
+= 2.4 =
+* New: Added per-page mapping
 
 = 2.3 =
 * New: Added custom posts types mapping
