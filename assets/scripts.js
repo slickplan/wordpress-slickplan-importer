@@ -32,7 +32,7 @@ jQuery(document).ready(function($) {
         const $selectType = $pinnedBar.find('select[name*="custom_type"]');
         const $selectTypes = $pinnedBar.find('select[name*="custom_list_"]').hide();
 
-        const _mapping = $mappingInput.val() ? JSON.parse($mappingInput.val()) : {};
+        const _mapping = window.SLICKPLAN_JSON || {};
         $mappingTable.find('tr[data-id]').each(function () {
             if (!_mapping[this.dataset.id]) {
                 _mapping[this.dataset.id] = {
@@ -188,12 +188,14 @@ jQuery(document).ready(function($) {
                 if (action === 'exclude') {
                     $checked.each(function () {
                         _mapping[this.id] = {
+                            cell: this.id,
                             type: 'exclude'
                         };
                     });
                 } else if (action === 'overwrite' && $selectTypes.filter(':visible:first').val()) {
                     $checked.each(function () {
                         _mapping[this.id] = {
+                            cell: this.id,
                             type: 'overwrite',
                             value: $selectType.val(),
                             id: $selectTypes.filter(':visible:first').val()
@@ -202,6 +204,7 @@ jQuery(document).ready(function($) {
                 } else {
                     $checked.each(function () {
                         _mapping[this.id] = {
+                            cell: this.id,
                             type: 'new',
                             value: $selectType.val()
                         };
@@ -214,10 +217,11 @@ jQuery(document).ready(function($) {
         updateDisplay();
     }
 
-    if (window.SLICKPLAN_JSON) {
+    const $summary = $form.find('.slickplan-summary');
+    const $progress = $('#slickplan-progressbar');
+
+    if (window.SLICKPLAN_JSON && $summary.length && $progress.length) {
         const $window = $(window);
-        const $summary = $form.find('.slickplan-summary');
-        const $progress = $('#slickplan-progressbar');
 
         const _types = window.SLICKPLAN_JSON.types;
         const _pages = window.SLICKPLAN_JSON.pages;

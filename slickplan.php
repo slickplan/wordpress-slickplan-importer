@@ -418,6 +418,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             $mappingJson = [];
             foreach ($existingPosts as $post) {
                 $mappingJson[$post->meta_value] = [
+                    'cell' => $post->meta_value,
                     'type' => 'overwrite',
                     'value' => $post->post_type,
                     'id' => $post->post_id,
