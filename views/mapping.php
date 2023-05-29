@@ -34,7 +34,7 @@
                 'post_status' => $statuses,
             ]);
             ?>
-            <select name="<?= $name ?>">
+            <select name="<?php echo esc_attr($name); ?>">
                 <?php foreach ($posts as $single) { ?>
                     <option value="<?php echo esc_attr($single->ID); ?>"><?php echo esc_html($single->post_title); ?></option>
                 <?php } ?>
@@ -75,7 +75,10 @@
         <input class="button button-primary" type="submit" value="Import Pages">
     <?php } ?>
     <a href="<?php echo esc_attr($this->_getAdminUrl('options')); ?>" class="button button-secondary">Back</a>
-    <input type="hidden" name="slickplan_importer[json]" value="<?= esc_attr(json_encode($mappingJson)); ?>" id="slickplan-map-json">
+    <script>
+        window.SLICKPLAN_JSON = <?php echo !empty($mappingJson) ? json_encode($mappingJson) : 'null'; ?>
+    </script>
+    <input type="hidden" name="slickplan_importer[json]" value="" id="slickplan-map-json">
 </form>
 
 <script type="text/html" id="slickplan-pages"></script>

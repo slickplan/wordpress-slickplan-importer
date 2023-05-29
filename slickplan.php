@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/extend/plugins/slickplan-importer/
 Description: Quickly import your <a href="https://slickplan.com" target="_blank">Slickplan</a> project into your WordPress site. To use go to the <a href="import.php">Tools -> Import</a> screen and select Slickplan.
 Author: Slickplan.com <info@slickplan.com>
 Author URI: https://slickplan.com/
-Version: 2.4.1
+Version: 2.4.3
 License: GPL-3.0 - https://www.gnu.org/licenses/gpl-3.0.html
 */
 
@@ -1426,13 +1426,13 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             foreach ($pages as $page) {
                 $childs = (!empty($page['childs']) && is_array($page['childs'])) ? $page['childs'] : null;
                 ?>
-                <tr data-id="<?= esc_attr($page['id']) ?>" <?php if (count($parents)) echo 'class="' . esc_attr(implode(' ', $parents)) . '"'; ?>>
+                <tr data-id="<?php echo esc_attr($page['id']); ?>" <?php if (count($parents)) echo 'class="' . esc_attr(implode(' ', $parents)) . '"'; ?>>
                     <th scope="row" class="check-column">
-                        <input type="checkbox" id="<?= esc_attr($page['id']) ?>">
+                        <input type="checkbox" id="<?php echo esc_attr($page['id']); ?>">
                     </th>
                     <td class="column-title column-primary">
                         <strong style="display: inline-block; font-weight: 400;">
-                            <label for="<?= esc_attr($page['id']) ?>"><?= str_repeat('— ', count($parents)); ?> <?= esc_html($this->_getFormattedTitle($page)) ?></label>
+                            <label for="<?php echo esc_attr($page['id']); ?>"><?php echo str_repeat('— ', count($parents)); ?> <?php echo esc_html($this->_getFormattedTitle($page)); ?></label>
                         </strong>
                         <?php if ($childs) { ?>
                             <a href="#" class="collapse-page" title="Expand/Collapse childs"><span class="dashicons dashicons-arrow-up"></span></a>
