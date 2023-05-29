@@ -32,10 +32,11 @@ jQuery(document).ready(function($) {
         const $selectType = $pinnedBar.find('select[name*="custom_type"]');
         const $selectTypes = $pinnedBar.find('select[name*="custom_list_"]').hide();
 
-        const mapping = $mappingInput.val() ? JSON.parse($mappingInput.val()) : {};
+        const _mapping = $mappingInput.val() ? JSON.parse($mappingInput.val()) : {};
         $mappingTable.find('tr[data-id]').each(function () {
-            if (!mapping[this.dataset.id]) {
-                mapping[this.dataset.id] = {
+            if (!_mapping[this.dataset.id]) {
+                _mapping[this.dataset.id] = {
+                    cell: this.dataset.id,
                     type: 'new',
                     value: 'page'
                 };
@@ -51,21 +52,23 @@ jQuery(document).ready(function($) {
         };
 
         const updateDisplay = function (cellIds) {
+            $mappingInput.val(JSON.stringify(Object.values(_mapping)));
+
             if (!cellIds) {
-                cellIds = Object.keys(mapping);
+                cellIds = Object.keys(_mapping);
             }
             cellIds.forEach(function (cellId) {
                 let html = '';
-                if (mapping[cellId]) {
-                    if (mapping[cellId].type === 'new') {
+                if (_mapping[cellId]) {
+                    if (_mapping[cellId].type === 'new') {
                         html += '<span style="opacity: 0.75; color: green;">&rarr;</span> New ';
-                        html += '<strong>' + postTypeName(mapping[cellId].value) + '</strong> ';
-                    } else if (mapping[cellId].type === 'exclude') {
+                        html += '<strong>' + postTypeName(_mapping[cellId].value) + '</strong> ';
+                    } else if (_mapping[cellId].type === 'exclude') {
                         html += '<span style="opacity: 0.75; color: red;">&times;</span> <span style="opacity: 0.5">Exclude</span> ';
-                    } else if (mapping[cellId].type === 'overwrite') {
+                    } else if (_mapping[cellId].type === 'overwrite') {
                         html += '<span style="opacity: 0.75; color: blue;">&rarr;</span> Overwrite ';
-                        html += '<strong>' + postTypeName(mapping[cellId].value) + ':</strong> ';
-                        html += $selectTypes.filter('[name="custom_list_' + mapping[cellId].value + '"]').find('option[value="' + mapping[cellId].id + '"]').text().replace(/&nbsp;/g, ' ').trim();
+                        html += '<strong>' + postTypeName(_mapping[cellId].value) + ':</strong> ';
+                        html += $selectTypes.filter('[name="custom_list_' + _mapping[cellId].value + '"]').find('option[value="' + _mapping[cellId].id + '"]').text().replace(/&nbsp;/g, ' ').trim();
                     }
                 } else {
                     html += 'New <strong>' + postTypeName('page') + '</strong> ';
@@ -74,12 +77,10 @@ jQuery(document).ready(function($) {
                 $mappingTable.find('tr[data-id="' + cellId + '"] > td:last').html(html);
             });
 
-            const count = Object.keys(mapping).filter(function (key) {
-                return mapping[key] && mapping[key].type !== 'exclude';
+            const count = Object.keys(_mapping).filter(function (key) {
+                return _mapping[key] && _mapping[key].type !== 'exclude';
             }).length;
             $form.children('input.button[type="submit"]').val('Import Pages (' + count + ')').attr('disabled', count < 1);
-
-            $mappingInput.val(JSON.stringify(mapping));
         };
 
         $mappingTable.closest('table')
@@ -107,11 +108,11 @@ jQuery(document).ready(function($) {
                     .filter('#' + id)
                     .prop('checked', true)
                     .trigger('change');
-                if (mapping[id]) {
-                    $selectAction.val(mapping[id].type).trigger('change');
-                    $selectType.val(mapping[id].value).trigger('change');
-                    if (mapping[id].id) {
-                        $selectTypes.filter('[name$="_' + mapping[id].value + '"]').val(mapping[id].id).trigger('change');
+                if (_mapping[id]) {
+                    $selectAction.val(_mapping[id].type).trigger('change');
+                    $selectType.val(_mapping[id].value).trigger('change');
+                    if (_mapping[id].id) {
+                        $selectTypes.filter('[name$="_' + _mapping[id].value + '"]').val(_mapping[id].id).trigger('change');
                     }
                 }
             })
@@ -186,13 +187,13 @@ jQuery(document).ready(function($) {
                 const action = $selectAction.val();
                 if (action === 'exclude') {
                     $checked.each(function () {
-                        mapping[this.id] = {
+                        _mapping[this.id] = {
                             type: 'exclude'
                         };
                     });
                 } else if (action === 'overwrite' && $selectTypes.filter(':visible:first').val()) {
                     $checked.each(function () {
-                        mapping[this.id] = {
+                        _mapping[this.id] = {
                             type: 'overwrite',
                             value: $selectType.val(),
                             id: $selectTypes.filter(':visible:first').val()
@@ -200,7 +201,7 @@ jQuery(document).ready(function($) {
                     });
                 } else {
                     $checked.each(function () {
-                        mapping[this.id] = {
+                        _mapping[this.id] = {
                             type: 'new',
                             value: $selectType.val()
                         };

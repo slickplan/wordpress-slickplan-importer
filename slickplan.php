@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/extend/plugins/slickplan-importer/
 Description: Quickly import your <a href="https://slickplan.com" target="_blank">Slickplan</a> project into your WordPress site. To use go to the <a href="import.php">Tools -> Import</a> screen and select Slickplan.
 Author: Slickplan.com <info@slickplan.com>
 Author URI: https://slickplan.com/
-Version: 2.4
+Version: 2.4.1
 License: GPL-3.0 - https://www.gnu.org/licenses/gpl-3.0.html
 */
 
@@ -392,8 +392,13 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             }
 
             if (isset($_POST['slickplan_importer']) and is_array($_POST['slickplan_importer']) and wp_verify_nonce($_POST['_wpnonce'])) {
-                $xml['mapping'] = json_decode(stripslashes($_POST['slickplan_importer']['json']), true);
-                unset($_POST['slickplan_importer']['json']);
+                $mapping = json_decode(stripslashes($_POST['slickplan_importer']['json']), true);
+                $xml['mapping'] = [];
+                foreach ($mapping as $mapped) {
+                    $xml['mapping'][$mapped['cell']] = $mapped;
+                    unset($xml['mapping'][$mapped['cell']]['cell']);
+                }
+                unset($_POST['slickplan_importer']['json'], $mapping);
                 $xml['import_form'] = array_merge($xml['import_form'] ?? [], $_POST['slickplan_importer']);
 
                 $this->setPluginData($xml, $this->_getAdminUrl('import'));
