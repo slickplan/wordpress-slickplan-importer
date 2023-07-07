@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/extend/plugins/slickplan-importer/
 Description: Quickly import your <a href="https://slickplan.com" target="_blank">Slickplan</a> project into your WordPress site. To use go to the <a href="import.php">Tools -> Import</a> screen and select Slickplan.
 Author: Slickplan.com <info@slickplan.com>
 Author URI: https://slickplan.com/
-Version: 2.4.3
+Version: 2.4.4
 License: GPL-3.0 - https://www.gnu.org/licenses/gpl-3.0.html
 */
 
@@ -417,13 +417,16 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             ");
             $mappingJson = [];
             foreach ($existingPosts as $post) {
-                $mappingJson[$post->meta_value] = [
-                    'cell' => $post->meta_value,
-                    'type' => 'overwrite',
-                    'value' => $post->post_type,
-                    'id' => $post->post_id,
-                ];
+                if (isset($xml['pages'][$post->meta_value])) {
+                    $mappingJson[$post->meta_value] = [
+                        'cell' => $post->meta_value,
+                        'type' => 'overwrite',
+                        'value' => $post->post_type,
+                        'id' => $post->post_id,
+                    ];
+                }
             }
+
             require_once SLICKPLAN_PLUGIN_PATH . 'views/mapping.php';
         }
 
@@ -607,6 +610,18 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 'menu_order' => $this->_order,
                 'post_parent' => $parent_id,
             ];
+
+            if (isset($data['contents']) && is_array($data['contents']) && array_is_list($data['contents'])) {
+                $lang = $xml['import_form']['content_lang'] ?? 'en_US';
+                $contents = [];
+                foreach ($data['contents'] as $contentsItem) {
+                    if (($contentsItem['@attributes']['lang'] ?? 'en_US') === $lang) {
+                        $contents = $contentsItem;
+                        break;
+                    }
+                }
+                $data['contents'] = $contents;
+            }
 
             // Set post content
             if (($this->_options['content'] ?? null) === 'desc') {
@@ -1957,5 +1972,12 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             $result = $slickplan->ajaxImport($_POST['slickplan']);
         }
         wp_send_json($result);
+    }
+
+    if (!function_exists('array_is_list')) {
+        function array_is_list(array $a)
+        {
+            return $a === [] || (array_keys($a) === range(0, count($a) - 1));
+        }
     }
 }
