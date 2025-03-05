@@ -83,14 +83,14 @@
                     );
                     $radios[] = $this->displayRadio(
                         'titles_change',
-                        'Make just the first character uppercase',
+                        'Capitalize first character of the first word',
                         'ucfirst',
                         'This is an example page title',
                         ($xml['import_form']['titles_change'] ?? null) === 'ucfirst'
                     );
                     $radios[] = $this->displayRadio(
                         'titles_change',
-                        'Uppercase the first character of each word',
+                        'Capitalize the first character of each word',
                         'ucwords',
                         'This Is An Example Page Title',
                         ($xml['import_form']['titles_change'] ?? null) === 'ucwords'

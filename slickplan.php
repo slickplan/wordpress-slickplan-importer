@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/extend/plugins/slickplan-importer/
 Description: Quickly import your <a href="https://slickplan.com" target="_blank">Slickplan</a> project into your WordPress site. To use go to the <a href="import.php">Tools -> Import</a> screen and select Slickplan.
 Author: Slickplan.com <info@slickplan.com>
 Author URI: https://slickplan.com/
-Version: 2.4.4
+Version: 2.4.6
 License: GPL-3.0 - https://www.gnu.org/licenses/gpl-3.0.html
 */
 
@@ -1424,7 +1424,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             $options = $this->getPostTypes();
             usort($options, function ($a, $b) use ($singularName) {
                 $a = $singularName ? $a->labels->singular_name : $a->label;
-                $b = $singularName ? $b->labels->singular_name : $a->label;
+                $b = $singularName ? $b->labels->singular_name : $b->label;
                 return 0 > strcmp($a, $b) ? -1 : 1;
             });
             return array_map(function ($item) use ($singularName) {
@@ -1518,6 +1518,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                                         if (!$isMainSection && !isset($cell['parent']) && array_key_exists($section['options']['id'], $this->_sectionsMap)) {
                                             $cell['parent'] = $this->_sectionsMap[$section['options']['id']];
                                         }
+                                        $cell['level'] = $this->_getCellLevel($cell);
                                         $array['pages'][$cell['@attributes']['id']] = $cell;
                                     }
                                 }
@@ -1707,7 +1708,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                 if ($section_id !== 'svgmainsection') {
                     $remove = true;
                     foreach ($section['cells']['cell'] as $cell_key => $cell) {
-                        $cell['level'] = (string) $cell['level'];
+                        $cell['level'] = $this->_getCellLevel($cell);
                         if ($cell['level'] === 'home') {
                             unset($array['section'][$section_key]['cells']['cell'][$cell_key]);
                         } elseif ($cell['level'] === '1' and isset($this->_sectionsMap[$section_id])) {
@@ -1739,7 +1740,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             $multi_array = [];
             if (isset($array['section'][$main_section_key]['cells']['cell'])) {
                 foreach ($array['section'][$main_section_key]['cells']['cell'] as $cell) {
-                    $level = (string) $cell['level'];
+                    $level = $this->_getCellLevel($cell);
                     if (isset($cell['@attributes']['id']) and in_array($level, ['home', 'util', '1', 'foot'], true)) {
                         $level = $level === '1' ? 'main' : $cell['level'];
                         if (!isset($multi_array[$level]) or !is_array($multi_array[$level])) {
@@ -1759,6 +1760,25 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             }
             unset($array, $cells);
             return $multi_array;
+        }
+
+        /**
+         * @param array $cell
+         * @return string
+         */
+        private function _getCellLevel(array $cell): string
+        {
+            $cell['level'] = (string) (empty($cell['level']) ? '' : $cell['level']);
+
+            if (isset($cell['level']) and in_array($cell['level'], ['home', 'util', '1', 'foot'], true)) {
+                return $cell['level'];
+            }
+
+            if (isset($cell['parent']) and $cell['parent']) {
+              return 'main';
+            }
+
+            return '1';
         }
 
         /**
