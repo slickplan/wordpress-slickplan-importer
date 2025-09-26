@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/extend/plugins/slickplan-importer/
 Description: Quickly import your <a href="https://slickplan.com" target="_blank">Slickplan</a> project into your WordPress site. To use go to the <a href="import.php">Tools -> Import</a> screen and select Slickplan.
 Author: Slickplan.com <info@slickplan.com>
 Author URI: https://slickplan.com/
-Version: 2.5.0
+Version: 2.5.1
 License: GPL-3.0 - https://www.gnu.org/licenses/gpl-3.0.html
 */
 
@@ -673,7 +673,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             return $page;
         }
 
-        private function _importPageYoast(array $data, $pageId)
+        private function _importPageYoast($data, $pageId)
         {
             if (!class_exists('WPSEO_Meta') or !method_exists('WPSEO_Meta', 'set_value')) {
                 return;
@@ -707,7 +707,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
             }
         }
 
-        private function _importPageAioSeo(array $data, $pageId)
+        private function _importPageAioSeo($data, $pageId)
         {
             if (
                 !defined('AIOSEO_VERSION')
@@ -1385,6 +1385,11 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                                 $array['section']['options']['id'] = $array['section']['@attributes']['id'];
                             }
                             $array['section'] = [$array['section']];
+                        }
+                        foreach ($array['section'] as $section_key => $section) {
+                            if (isset($section['cells']['cell']['text'])) {
+                                $array['section'][$section_key]['cells']['cell'] = [$section['cells']['cell']];
+                            }
                         }
                         $array['sitemap'] = $this->_getMultidimensionalArrayHelper($array);
                         $array['users'] = [];
