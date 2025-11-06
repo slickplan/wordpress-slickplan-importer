@@ -266,6 +266,7 @@ jQuery(document).ready(function($) {
             $progress.progressbar('value', percent);
             const isLastPage = _pages[pageType].length === pageIndex + 1;
             const isLastType = _pageTypes.length === pageTypeIndex + 1;
+
             $.ajax({
                 url: slickplan_ajax.ajaxurl,
                 method: 'POST',
@@ -291,7 +292,7 @@ jQuery(document).ready(function($) {
                         if (isLastPage && isLastType) {
                             $progress.progressbar('value', 100);
                             $form.find('h3').text('Success!');
-                            $form.find('.slickplan-show-summary').show();
+                            $form.parent().find('.slickplan-show-summary').show();
                             window.SLICKPLAN_JSON = null;
                         } else {
                             _importPage(isLastPage ? pageTypeIndex + 1 : pageTypeIndex, isLastPage ? 0 : pageIndex + 1);
@@ -299,8 +300,11 @@ jQuery(document).ready(function($) {
                         $window.trigger('resize');
                     }
                 },
-                error: function () {
-                    alert('Unknown error, please delete imported pages and try again.');
+                error: function (xhr, status, errorMessage) {
+                    $progress.hide();
+                    $form.parent().find('.slickplan-show-error').prepend('<p>' + (errorMessage ? 'Error: ' + errorMessage + ' (' + status + ')' : 'Unknown error.') + '</p>').show();
+                    $form.hide();
+                    window.SLICKPLAN_JSON = null;
                 }
             });
         };

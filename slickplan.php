@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/extend/plugins/slickplan-importer/
 Description: Quickly import your <a href="https://slickplan.com" target="_blank">Slickplan</a> project into your WordPress site. To use go to the <a href="import.php">Tools -> Import</a> screen and select Slickplan.
 Author: Slickplan.com <info@slickplan.com>
 Author URI: https://slickplan.com/
-Version: 2.5.1
+Version: 2.5.2
 License: GPL-3.0 - https://www.gnu.org/licenses/gpl-3.0.html
 */
 
@@ -916,7 +916,8 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
 
         private function _getMediaElementArray(array $element): array
         {
-            $items = $element['content']['contentelement'] ?? $element['content'];
+            $items = $element['content']['contentelement'] ?? $element['content'] ?? null;
+
             return isset($items['type'])
                 ? [$items]
                 : (isset($items[0]['type']) ? $items : []);
