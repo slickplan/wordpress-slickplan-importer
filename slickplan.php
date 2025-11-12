@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/extend/plugins/slickplan-importer/
 Description: Quickly import your <a href="https://slickplan.com" target="_blank">Slickplan</a> project into your WordPress site. To use go to the <a href="import.php">Tools -> Import</a> screen and select Slickplan.
 Author: Slickplan.com <info@slickplan.com>
 Author URI: https://slickplan.com/
-Version: 2.5.2
+Version: 2.5.3
 License: GPL-3.0 - https://www.gnu.org/licenses/gpl-3.0.html
 */
 
@@ -635,10 +635,12 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
                     ]);
                 }
 
-                // SEO by Yoast integration
-                $this->_importPageYoast($data['contents'], $page['ID']);
-                // All In One SEO Pack integration
-                $this->_importPageAioSeo($data['contents'], $page['ID']);
+                if (isset($data['contents']) && is_array($data['contents'])) {
+                    // SEO by Yoast integration
+                    $this->_importPageYoast($data['contents'], $page['ID']);
+                    // All In One SEO Pack integration
+                    $this->_importPageAioSeo($data['contents'], $page['ID']);
+                }
 
                 if (
                     ($featuredImage = $data['contents']['meta_featured_image'] ?? null)
@@ -1085,7 +1087,7 @@ if (class_exists('WP_Importer') and !class_exists('Slickplan_Importer')) {
 
         private function _getFormattedTitle(array $data): string
         {
-            $title = (isset($data['contents']['page_title']) and $data['contents']['page_title'])
+            $title = ($data['contents']['page_title'] ?? null)
                 ? $data['contents']['page_title']
                 : ($data['text'] ?? $data['title'] ?? '');
             if (($this->_options['titles'] ?? null) === 'ucfirst') {
